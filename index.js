@@ -12,23 +12,74 @@ const hospitals = [
   ["Woodhull Medical and Mental Health Center", 40.70052661478, -73.941643858765]
 ]
 
+// TODO hook up to server request
+const dummy_values = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11]
 
 document.onreadystatechange = function () {
   var state = document.readyState;
   if (state == 'interactive') {
     var map = L.map('map').setView([40.7212, -73.8638], 11);
+    var layerGroup = L.layerGroup();
+    map.addLayer(layerGroup)
     L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
-        maxZoom: 19,
-        attribution: '&copy; <a href="http://www.openstreetmap.org/copyright">OpenStreetMap</a>'
+      maxZoom: 19,
+      attribution: '&copy; <a href="http://www.openstreetmap.org/copyright">OpenStreetMap</a>'
     }).addTo(map);
-    drawHospitalRegions(map)
+    document.getElementById("same-circles").addEventListener("click", () => {
+      drawHospitalCirclesSameSizeRegions(map, layerGroup, dummy_values)
+    })
+    document.getElementById("diff-circles").addEventListener("click", () => {
+      drawHospitalCirclesDifferentSizeRegions(map, layerGroup, dummy_values)
+    })
+
+    drawHospitalCirclesSameSizeRegions(map, layerGroup, dummy_values)
   }
 };
 
-function drawHospitalRegions(map) {
+function drawHospitalCirclesSameSizeRegions(map, layerGroup, values) {
+  clearMap(map, layerGroup)
+  const radii = Array(hospitals.length).fill(1000)
+  drawHospitalCircleRegions(layerGroup, radii, values)
+}
+
+function drawHospitalCirclesDifferentSizeRegions(map, layerGroup, values) {
+  clearMap(map, layerGroup)
+  const radii = [
+    2500, 2000, 3000, 4000,
+    5000, 2000, 7000, 5000,
+    1500, 1500, 3000
+  ];
+  drawHospitalCircleRegions(layerGroup, radii, values)
+}
+
+function drawHospitalCircleRegions(layerGroup, radii, values) {
   for (let i = 0; i < hospitals.length; i++) {
     let hospital = hospitals[i];
+    let radius = radii[i]
+    let value = values[i];
     let coord = [hospital[1], hospital[2]];
-    let marker = L.marker(coord).addTo(map);
+    layerGroup.addLayer(L.circle(coord, radius))
+    drawMarker(layerGroup, coord, radius, value)
+  }
+}
+
+function drawMarker(layerGroup, coord, radius, value) {
+  const icon = new L.divIcon({
+    className: "value-icon",
+    iconSize: [25, 31],
+    iconAnchor: [12, 31],
+    popupAnchor: [0, -34],
+    shadowSize: [31, 31],
+    html: `<span class="icon-text">${value}</span>`
+  })
+  let marker = L.marker(coord, {
+    icon
+  })
+  layerGroup.addLayer(marker);
+}
+
+function clearMap(map, layerGroup) {
+  if (map.hasLayer(layerGroup)) {
+    layerGroup.clearLayers();
   }
 }

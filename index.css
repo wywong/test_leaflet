@@ -1,4 +1,28 @@
+body {
+    display: flex;
+    height: 100%;
+}
+
 #map {
     height: 100%;
     width: 80%;
 }
+
+.icon-text {
+    color: white;
+    text-align: center;
+    font-weight: bold;
+}
+
+.value-icon {
+    display: grid;
+    align-items: center;
+    background: darkred;
+    border: black solid 2px;
+}
+
+.controls {
+    display: flex;
+    flex-direction: column;
+}
+
